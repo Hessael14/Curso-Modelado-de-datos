@@ -1,14 +1,14 @@
 ## Cálculo de tasa delictiva en Power Pivot usando DAX:
-Tasa delictiva:=(CALCULATE(SUM('Municipal-Delitos-2015-2024_abr2024'[Valor]))/CALCULATE(SUM(PoblacionFemPuebla[Población femenina 2020]))*100000)
+Tasa delictiva:=(CALCULATE(SUM('Municipal-Delitos-2015-2024_may2024'[Valor]))/CALCULATE(SUM(PoblacionFemPuebla[Población femenina 2020]))*100000)
 
 Generar columna de fechas en la tabla de incidencia delictiva
 
-= FORMAT(1&"/"&'Municipal-Delitos-2015-2024_abr2024'[MesNumero]&"/"&'Municipal-Delitos-2015-2024_abr2024'[Año.1], "DD/MM/YYYY")
+= FORMAT(1&"/"&'Municipal-Delitos-2015-2024_may2024'[MesNumero]&"/"&'Municipal-Delitos-2015-2024_may2024'[Año.1], "DD/MM/YYYY")
 
 ## Editor avanzado: transformación de datos.
 
 let
-    Origen = Csv.Document(File.Contents("C:\Users\ECI-SDIS-057\OneDrive - Universidad del Valle de México S.C\Documentos\Municipal-Delitos-2015-2024_abr2024\Municipal-Delitos-2015-2024_abr2024.csv"),[Delimiter=",", Columns=21, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    Origen = Csv.Document(File.Contents("C:\Users\ECI-SDIS-057\OneDrive - Universidad del Valle de México S.C\Documentos\Municipal-Delitos-2015-2024_may2024\Municipal-Delitos-2015-2024_may2024.csv"),[Delimiter=",", Columns=21, Encoding=1252, QuoteStyle=QuoteStyle.None]),
     #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
     #"Tipo cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos",{{"Año", Int64.Type}, {"Clave_Ent", Int64.Type}, {"Entidad", type text}, {"Cve. Municipio", Int64.Type}, {"Municipio", type text}, {"Bien jurídico afectado", type text}, {"Tipo de delito", type text}, {"Subtipo de delito", type text}, {"Modalidad", type text}, {"Enero", Int64.Type}, {"Febrero", Int64.Type}, {"Marzo", Int64.Type}, {"Abril", Int64.Type}, {"Mayo", Int64.Type}, {"Junio", Int64.Type}, {"Julio", Int64.Type}, {"Agosto", Int64.Type}, {"Septiembre", Int64.Type}, {"Octubre", Int64.Type}, {"Noviembre", Int64.Type}, {"Diciembre", Int64.Type}}),
     #"Tipo cambiado1" = Table.TransformColumnTypes(#"Tipo cambiado",{{"Año", type text}}),
