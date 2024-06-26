@@ -1,0 +1,24 @@
+## Cálculo de tasa delictiva en Power Pivot usando DAX:
+Tasa delictiva:=(CALCULATE(SUM('Municipal-Delitos-2015-2024_abr2024'[Valor]))/CALCULATE(SUM(PoblacionFemPuebla[Población femenina 2020]))*100000)
+
+Generar columna de fechas en la tabla de incidencia delictiva
+
+= FORMAT(1&"/"&'Municipal-Delitos-2015-2024_abr2024'[MesNumero]&"/"&'Municipal-Delitos-2015-2024_abr2024'[Año.1], "DD/MM/YYYY")
+
+## Editor avanzado: transformación de datos.
+
+let
+    Origen = Csv.Document(File.Contents("C:\Users\ECI-SDIS-057\OneDrive - Universidad del Valle de México S.C\Documentos\Municipal-Delitos-2015-2024_abr2024\Municipal-Delitos-2015-2024_abr2024.csv"),[Delimiter=",", Columns=21, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+    #"Tipo cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos",{{"Año", Int64.Type}, {"Clave_Ent", Int64.Type}, {"Entidad", type text}, {"Cve. Municipio", Int64.Type}, {"Municipio", type text}, {"Bien jurídico afectado", type text}, {"Tipo de delito", type text}, {"Subtipo de delito", type text}, {"Modalidad", type text}, {"Enero", Int64.Type}, {"Febrero", Int64.Type}, {"Marzo", Int64.Type}, {"Abril", Int64.Type}, {"Mayo", Int64.Type}, {"Junio", Int64.Type}, {"Julio", Int64.Type}, {"Agosto", Int64.Type}, {"Septiembre", Int64.Type}, {"Octubre", Int64.Type}, {"Noviembre", Int64.Type}, {"Diciembre", Int64.Type}}),
+    #"Tipo cambiado1" = Table.TransformColumnTypes(#"Tipo cambiado",{{"Año", type text}}),
+    #"Tipo cambiado2" = Table.TransformColumnTypes(#"Tipo cambiado1",{{"Año", type date}}),
+    #"Columna de anulación de dinamización" = Table.UnpivotOtherColumns(#"Tipo cambiado2", {"Año", "Clave_Ent", "Entidad", "Cve. Municipio", "Municipio", "Bien jurídico afectado", "Tipo de delito", "Subtipo de delito", "Modalidad"}, "Atributo", "Valor"),
+    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Columna de anulación de dinamización",{{"Atributo", "Mes"}}),
+    #"Año insertado" = Table.AddColumn(#"Columnas con nombre cambiado", "Año.1", each Date.Year([Año]), Int64.Type),
+    #"Filas filtradas" = Table.SelectRows(#"Año insertado", each ([Entidad] = "Puebla")),
+    #"Personalizada agregada" = Table.AddColumn(#"Filas filtradas", "MesNumero", each [Mes]&" 1"),
+    #"Fecha analizada" = Table.TransformColumns(#"Personalizada agregada",{{"MesNumero", each Date.From(DateTimeZone.From(_)), type date}}),
+    #"Mes extraído" = Table.TransformColumns(#"Fecha analizada",{{"MesNumero", Date.Month, Int64.Type}}),
+    #"Valor reemplazado" = Table.ReplaceValue(#"Mes extraído","Teteles de Avila Castillo","Teteles de Ávila Castillo",Replacer.ReplaceText,{"Municipio"})
+ in #"Valor reemplazado"
